@@ -75,7 +75,7 @@ async function billieJean(song,artist)
 {
     spotifyApi.searchTracks(`track:${song} artist:${artist}`)
   .then(function(data) {
-    console.log('Search tracks by "Alright" in the track name and "Kendrick Lamar" in the artist name', JSON.stringify(data.body));
+    console.log('Search tracks by "Alright" in the track name and "Kendrick Lamar" in the artist name', JSON.stringify(data.body.tracks.items[0].uri));
   }, function(err) {
     console.log('Something went wrong!', err);
   });
@@ -83,7 +83,7 @@ async function billieJean(song,artist)
 }
 
 
-searcher("Black or White","Michael Jackson")
+// searcher("Black or White","Michael Jackson")
 
 // async function addTracks(tracks)
 // {
