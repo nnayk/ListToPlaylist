@@ -1,3 +1,4 @@
+const e = require('express');
 const fs = require('fs')
 const readline = require('readline')
 const getUser = require("./getUserData")
@@ -24,6 +25,9 @@ async function processLineByLine() {
   let song = ""
 let tracks = []
 
+ total = 0
+ success = 0
+
   for await (const line of rl) {
     // Each line in input.txt will be successively available here as `line`.
     console.log(line,line.length)
@@ -35,15 +39,23 @@ let tracks = []
         }
         else
         {
+            
+            try
+            {
             song = line
             // let title = await searcher("Black or White","Michael Jackson")
             // console.log("TITLE",JSON.stringify(title.body.tracks.items[0].uri)) 
             let songInfo = await getUser.searcher(song,currArtist)
-            try
+            console.log("SONG",song,"Artist",currArtist)
+
+            if (songInfo == undefined)
             {
-            console.log(`${song} details:\n ${songInfo.body.tracks.items[0]['uri']}`)
+              console.log("SONG",song,"artist",currArtist)
+              songInfo = await getUser.searcher(song)
+            }
+            // console.log(`${song} details:\n ${songInfo.body.tracks.items[0]['uri']}`)
             getUser.addTracks(songInfo.body.tracks.items[0]['uri'])
-            } catch (e) 
+            }catch (e) 
             {
               console.log("ERROR ADDING TRACK")
             }
