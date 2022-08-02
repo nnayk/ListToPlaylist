@@ -2,6 +2,7 @@ const e = require('express');
 const fs = require('fs')
 const readline = require('readline')
 const getUser = require("./getUserData")
+const prompt = require('prompt-sync')();
 
 // async function readF()
 // {
@@ -33,7 +34,7 @@ let tracks = []
     console.log(line,line.length)
     if (line.length > 0)
     {
-        if (line.includes(':') || line.includes('--'))
+        if (line.includes(':'))
         {
             currArtist = line.slice(0,-1)
         }
@@ -42,7 +43,26 @@ let tracks = []
             
             try
             {
-            song = line
+            let index = 0
+            if (line.includes('-'))
+            {
+              
+              index = line.indexOf('-')
+              currArtist = line.slice(0,index)
+              song = line.slice(index+1,line.length)
+            }
+            else if (line.includes('--'))
+            {
+              index = line.indexOf('--')
+              currArtist = line.slice(0,index)
+              song = line.slice(index+2,line.length)
+            }
+            else
+            {
+              song = line
+            }
+
+
             // let title = await searcher("Black or White","Michael Jackson")
             // console.log("TITLE",JSON.stringify(title.body.tracks.items[0].uri)) 
             let songInfo = await getUser.searcher(song,currArtist)
@@ -51,7 +71,7 @@ let tracks = []
             if (songInfo == undefined)
             {
               console.log("SONG",song,"artist",currArtist)
-              songInfo = await getUser.searcher(song)
+              songInfo = await getUser.searchSong(song)
             }
             // console.log(`${song} details:\n ${songInfo.body.tracks.items[0]['uri']}`)
             getUser.addTracks(songInfo.body.tracks.items[0]['uri'])
@@ -67,7 +87,15 @@ let tracks = []
   // getUser.addTracks(tracks)
 }
 
-processLineByLine();
+
+
+//usage inside aync function do not need closure demo only*
+const name = prompt('What is the name of the playlist? ');
+const desc = prompt("What is the playlist description? ")
+getUser.createPlaylist(name,desc).then(
+  processLineByLine()
+);
+
 
 // getUser.searcher()
 

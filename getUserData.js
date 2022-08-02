@@ -1,9 +1,11 @@
 // const fetch = require("node-fetch")
 const SpotifyWebApi = require("spotify-web-api-node")
-const access_token = 'BQDT65hlEe9J37IZEThHsbZgelbeQYe_d8HAIx2LUA5i1INAMvnzaglW7HQjMDa25UR4XKkBOJ2KQXJmDucRGZs_rfUPMmTZQWRsBScX2iALAIOPOVHZcWxiv6_c-GYj27xdmJFkcHFXh3BMwBS6AiV-3_GA_l0wV0Wo5XvdH1eLZXytsaKJX11ozNE0zWx0Ymk1PPUrPowyMdkwYLSwncjLxNhAKlRpIwa7pZY9EeldBPWNyUFXGQMTWVgpabezYJosxpMlZmxuXb6TvoUvu3HvWZxpB9j2jTTHG7Vh2DU6lzzCr-nwq1WNXQmeI_c-5cbaQRE5lfNrpQ6TlSe3'
+const access_token = 'BQDFfGj_K_5rw0l1OcdfwjSrSU79lxTVaDewXfBayWUV_w_bU0grLd67k1LPMYxIZH1kjDL9aF_isgYmCnZnG1lFYDOTtA5n0_nVwGv8NGGVXwvSEunmPVbMq2tneziIn1LGs_iXP2ZSPGE93mYEvt2gIssKTR91rWhISPo_KipnwEVtQ740XPSORWjLtrytQ_3xVtqGu4R8maILMspazn9lpl5YSQSShuCPbsVZCL1wX6YhtMgmuMKXeXQxmjJIFS2zev7A3Rwv9tej4eQL8LPRsubMLyQXSx6OkYMH38C9Dxf-OJsmhTtw3lGDiVJYVRds4yUdfcDDcj9PtWX3'
 const refresh_token = 'AQB8jqdlNBDxnKrUviefUcynBvudyJkhKAvUM4CxyLL_UEaPSyA4mtusyciIgMa1SNxXhju-a9VrR_K32Imz6aRfZFpHWXdfV_sy5QSqAAkXS67Pc6xACwhoLxA8OyPktQw'
 const spotifyApi = new SpotifyWebApi({accessToken:access_token});
 spotifyApi.setAccessToken(access_token);
+
+global.playlist_id = ""
 
 // (async () => {
 //   const me = await spotifyApi.getMe();
@@ -22,17 +24,23 @@ async function getPlayLists()
   });
 }
 
-async function createPlaylist()
+async function createPlaylist(name,description)
 {
-    spotifyApi.createPlaylist('Pappa\'s Oldies', { 'description': 'Pappa\'s favorite 20th century songs', 'public': true })
+    spotifyApi.createPlaylist(name, { 'description': description, 'public': true })
   .then(function(data) {
-    console.log('Created playlist!',data.body);
+    // console.log('Created playlist!',data.body);
+    let pl_uri = data.body.uri
+    let first = pl_uri.indexOf(':')
+    let second = pl_uri.indexOf(':',(first+1))
+    // console.log("SECOND",second)
+    global.playlist_id = pl_uri.slice(second+1,pl_uri.length)
+    console.log("PLAYAYYA",global.playlist_id)
   }, function(err) {
     console.log('Something went wrong!', err);
   });
 }
 
-// createPlaylist()
+// createPlaylist("SENGI","DESCY")
 
 // async function addTracks()
 // {
@@ -73,7 +81,7 @@ async function searcher(song,artist)
   // });
 }
 
-async function searcher(song)
+async function searchSong(song)
 {
   spotifyApi.setAccessToken(access_token);
   return spotifyApi.searchTracks(`track:${song}`)
@@ -103,9 +111,10 @@ async function searcher(song)
 
 async function billieJean(song,artist)
 {
-    spotifyApi.searchTracks(`track:${song}`)
+    spotifyApi.searchTracks(`track:${song} artist: ${artist}`)
   .then(function(data) {
     console.log('Search tracks by "Alright" in the track name and "Kendrick Lamar" in the artist name', JSON.stringify(data.body.tracks.items[0].uri));
+    addTracks(data.body.tracks.items[0].uri)
   }, function(err) {
     console.log('Something went wrong!', err);
   });
@@ -115,8 +124,11 @@ async function billieJean(song,artist)
 
 async function getData()
 {
-let title = await searcher("Black or White","")
-console.log("TITLE",title.body)
+let title = await searcher("Time","Pink Floyd")
+// console.log("TITLE",title.body)
+// billieJean("Time","Pink Floyd")
+addTracks(title.body.tracks.items[0]['uri'])
+
 
 // title = billieJean("Black or White","Michael Jackson")
 }
@@ -128,7 +140,7 @@ console.log("TITLE",title.body)
 async function addTracks(tracks)
 {
 spotifyApi.setAccessToken(access_token);
-spotifyApi.addTracksToPlaylist('2iDw58o5AeXbxCKijSex8Q', [tracks])
+spotifyApi.addTracksToPlaylist(global.playlist_id, [tracks])
   .then(function(data) {
     console.log('Added tracks to playlist!');
   }, function(err) {
@@ -138,9 +150,9 @@ spotifyApi.addTracksToPlaylist('2iDw58o5AeXbxCKijSex8Q', [tracks])
 }
 
 // getPlayLists()
-
-// createPlaylist()
+// 
+// createPlaylist("Helllo","DESC")s
 // addTracks()
 // getTrack()
 
-module.exports = {addTracks,searcher}
+module.exports = {addTracks,searcher,searchSong,createPlaylist}
